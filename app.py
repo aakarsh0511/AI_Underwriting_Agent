@@ -1,7 +1,7 @@
 import streamlit as st
 
 from src.data.data_loader import DataLoader
-
+from src.data.data_cleaner import DataCleaner
 st.set_page_config(
     page_title="AI Underwriting Agent",
     page_icon="🏦",
@@ -71,6 +71,12 @@ df = loader.load_data()
 summary = loader.dataset_summary(df)
 
 st.success("Dataset Loaded Successfully")
+df = loader.load_data()
+cleaner = DataCleaner()
+df = cleaner.remove_duplicate_rows(df)
+df, constant_columns = cleaner.remove_constant_columns(df)
+df, dropped_missing = cleaner.remove_high_missing_columns(df)
+df = cleaner.fill_missing_values(df)
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -81,13 +87,14 @@ col4.metric("Duplicates", summary["Duplicate Rows"])
 
 st.divider()
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "Preview",
     "Missing Values",
     "Data Types",
     "Target",
     "High Cardinality",
-    "Constant Columns"
+    "Constant Columns",
+    "Cleaning Summary"
 ])
 
 with tab1:
@@ -128,5 +135,22 @@ with tab6:
     st.write(
         f"Total Constant Columns : {len(constant)}"
     )
+with tab7:
+
+    st.subheader("Cleaning Report")
+
+    st.write(
+        f"Constant Columns Removed : {len(constant_columns)}"
+    )
+
+    st.write(
+        f"High Missing Columns Removed : {len(dropped_missing)}"
+    )
+
+    st.write("Remaining Dataset Shape")
+
+    st.write(df.shape)
 
     st.write(constant)
+
+
