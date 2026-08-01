@@ -1,11 +1,12 @@
 import streamlit as st
-
 from src.pipeline.training_pipeline import TrainingPipeline
 from src.data.profiler import DataProfiler
 from src.pipeline.prediction_pipeline import PredictionPipeline
 from src.forms.application_form import CustomerApplicationForm
 from src.pipeline.prediction_pipeline import PredictionPipeline
 from src.risk.risk_engine import RiskEngine
+from src.explainability.business_explainer import BusinessExplainer
+
 st.set_page_config(
     page_title="AI Underwriting Agent",
     page_icon="🏦",
@@ -346,24 +347,21 @@ with tab13:
         risk = risk_engine.calculate(
             probability
         )
-
+        explainer = BusinessExplainer()
+        explanation = explainer.explain(
+            application)
         st.divider()
-
         st.subheader("Risk Intelligence")
-
         col1, col2 = st.columns(2)
         col3, col4 = st.columns(2)
-
         col1.metric(
             "Risk Score",
             risk["risk_score"]
         )
-
         col2.metric(
             "Probability of Default",
             f"{risk['probability_default']:.2%}"
         )
-
         col3.metric(
             "Risk Bucket",
             risk["risk_bucket"]
@@ -397,3 +395,18 @@ with tab13:
             st.error(
                 f"Recommendation: {risk['recommendation']}"
             )
+        st.divider()
+        st.subheader("Business Explainability")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success("Positive Factors")
+            for item in explanation["positives"]:
+                st.write(f"✅ {item}")
+        with col2:
+
+            st.error("Risk Factors")
+
+            for item in explanation["negatives"]:
+
+                st.write(f"❌ {item}")
+        
