@@ -3,7 +3,8 @@ import streamlit as st
 from src.pipeline.training_pipeline import TrainingPipeline
 from src.data.profiler import DataProfiler
 from src.pipeline.prediction_pipeline import PredictionPipeline
-
+from src.forms.application_form import CustomerApplicationForm
+from src.pipeline.prediction_pipeline import PredictionPipeline
 # --------------------------------------------------
 # Streamlit Configuration
 # --------------------------------------------------
@@ -331,31 +332,31 @@ with tab12:
     )
 with tab13:
 
-    st.subheader("Prediction Pipeline Test")
+    form = CustomerApplicationForm()
 
-    sample = final_df.drop(
-        columns=["loan_status"]
-    ).head(1)
+    application = form.render()
 
-    predictor = PredictionPipeline()
+    if application is not None:
 
-    prediction, probability = predictor.predict(
-        sample
-    )
+        predictor = PredictionPipeline()
 
-    st.write("Sample Input")
+        prediction, probability = predictor.predict(
+            application
+        )
 
-    st.dataframe(sample)
+        st.divider()
 
-    st.metric(
-        "Probability of Default",
-        f"{probability:.2%}"
-    )
+        st.subheader("Risk Prediction")
 
-    if prediction == 1:
+        st.metric(
+            "Probability of Default",
+            f"{probability:.2%}"
+        )
 
-        st.error("Prediction : Charged Off")
+        if prediction == 0:
 
-    else:
+            st.success("Loan Category : Good Loan")
 
-        st.success("Prediction : Fully Paid")
+        else:
+
+            st.error("Loan Category : Bad Loan")
