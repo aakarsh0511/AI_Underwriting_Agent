@@ -6,6 +6,8 @@ from src.forms.application_form import CustomerApplicationForm
 from src.pipeline.prediction_pipeline import PredictionPipeline
 from src.risk.risk_engine import RiskEngine
 from src.explainability.business_explainer import BusinessExplainer
+from src.optimization.loan_optimizer import LoanOptimizer
+
 
 st.set_page_config(
     page_title="AI Underwriting Agent",
@@ -350,6 +352,9 @@ with tab13:
         explainer = BusinessExplainer()
         explanation = explainer.explain(
             application)
+        optimizer = LoanOptimizer()
+        suggestions = optimizer.optimize(
+            application)
         st.divider()
         st.subheader("Risk Intelligence")
         col1, col2 = st.columns(2)
@@ -409,4 +414,28 @@ with tab13:
             for item in explanation["negatives"]:
 
                 st.write(f"❌ {item}")
-        
+
+        st.divider()
+        st.subheader("Loan Optimization Suggestions")
+        if len(suggestions) == 0:
+            st.success(
+                "No optimization required. The application already looks financially strong."
+            )
+        else:
+            for i, suggestion in enumerate(suggestions, start=1):
+                with st.expander(
+                    f"Suggestion {i} - {suggestion['Category']}",
+                    expanded=True
+                ):
+                    col1, col2 = st.columns(2)
+                    col1.metric(
+                        "Current",
+                        suggestion["Current"]
+                    )
+                    col2.metric(
+                        "Suggested",
+                        suggestion["Suggested"]
+                    )
+                    st.info(
+                        suggestion["Benefit"]
+                    )
