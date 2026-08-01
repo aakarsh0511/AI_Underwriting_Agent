@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 .streamlit/
-models/*.pkl
 logs/
 .vscode/
 .DS_Store
