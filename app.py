@@ -23,17 +23,20 @@ st.markdown("## Offline Training Pipeline")
 # --------------------------------------------------
 
 try:
-
     pipeline = TrainingPipeline()
-
     result = pipeline.run()
-
     df = result["raw_df"]
     engineered_df = result["engineered_df"]
     final_df = result["final_df"]
-    X_processed = result["X_processed"]
-    y = result["target"]
-
+    X_train = result["X_train"]
+    X_test = result["X_test"]
+    y_train = result["y_train"]
+    y_test = result["y_test"]
+    X_train_processed = result["X_train_processed"]
+    X_test_processed = result["X_test_processed"]
+    model_results = result["model_results"]
+    best_model = result["best_model"]
+    best_auc = result["best_auc"]
     constant_columns = result["constant_columns"]
     dropped_missing = result["dropped_columns"]
 
@@ -41,34 +44,25 @@ except Exception as e:
 
     st.error(e)
     st.stop()
-
-
 # --------------------------------------------------
 # Dataset Summary
 # --------------------------------------------------
-
 summary = {
     "Rows": df.shape[0],
     "Columns": df.shape[1],
     "Missing Values": int(df.isnull().sum().sum()),
     "Duplicate Rows": int(df.duplicated().sum())
 }
-
 col1, col2, col3, col4 = st.columns(4)
-
 col1.metric("Rows", summary["Rows"])
 col2.metric("Columns", summary["Columns"])
 col3.metric("Missing Values", summary["Missing Values"])
 col4.metric("Duplicate Rows", summary["Duplicate Rows"])
-
 st.divider()
-
-
 # --------------------------------------------------
 # Tabs
 # --------------------------------------------------
-
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.tabs([
     "Preview",
     "Missing Values",
     "Data Types",
@@ -77,35 +71,25 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "Constant Columns",
     "Cleaning Summary",
     "Business Features",
-    "Final Training Dataset",
-    "Preprocessing"
+    "Final Dataset",
+    "Preprocessing",
+    "Train/Test Split",
+    "Model Training"
 ])
-
-
 # --------------------------------------------------
 # Preview
 # --------------------------------------------------
-
 with tab1:
-
     st.subheader("Dataset Preview")
-
     st.dataframe(df.head())
-
-
 # --------------------------------------------------
 # Missing Values
 # --------------------------------------------------
-
 with tab2:
-
     st.subheader("Missing Values")
-
     st.dataframe(
         DataProfiler.missing_values(df)
     )
-
-
 # --------------------------------------------------
 # Data Types
 # --------------------------------------------------
@@ -277,16 +261,70 @@ with tab9:
 
 with tab10:
 
-    st.subheader("Preprocessing Summary")
+    st.subheader("Preprocessing")
 
-    st.write(
-        f"Processed Samples : {X_processed.shape[0]}"
+    col1, col2 = st.columns(2)
+
+    col1.metric(
+        "Train Samples",
+        X_train_processed.shape[0]
     )
 
-    st.write(
-        f"Processed Features : {X_processed.shape[1]}"
+    col2.metric(
+        "Processed Features",
+        X_train_processed.shape[1]
     )
+
+    st.success("Preprocessing Completed")
+
+
+with tab11:
+
+    st.subheader("Train Test Split")
+
+    col1, col2 = st.columns(2)
+
+    col1.metric(
+        "Training Samples",
+        X_train.shape[0]
+    )
+
+    col2.metric(
+        "Testing Samples",
+        X_test.shape[0]
+    )
+
+    st.write("### Training Target Distribution")
+
+    st.dataframe(
+        y_train.value_counts()
+        .rename_axis("Target")
+        .reset_index(name="Count")
+    )
+
+    st.write("### Testing Target Distribution")
+
+    st.dataframe(
+        y_test.value_counts()
+        .rename_axis("Target")
+        .reset_index(name="Count")
+    )
+with tab12:
+
+    st.subheader("Model Training")
 
     st.success(
-        "Preprocessor saved successfully."
+        f"Best Model : {best_model}"
+    )
+
+    st.metric(
+        "Best ROC AUC",
+        best_auc
+    )
+
+    st.write("### Model Comparison")
+
+    st.dataframe(
+        model_results,
+        use_container_width=True
     )
