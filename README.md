@@ -225,18 +225,7 @@ AI_Underwriting_Agent/
 
 ---
 
-# Future Enhancements
 
-The project has been designed with a modular architecture and can be extended with:
-
-- Underwriting Policy Engine
-- Counterfactual Recommendation Engine
-- Similar Historical Case Retrieval
-- AI Underwriting Copilot (LLM)
-- Executive PDF Report Generation
-- REST API Integration
-
----
 
 # Why This Project?
 
