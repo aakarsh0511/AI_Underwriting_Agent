@@ -5,16 +5,12 @@ from src.data.profiler import DataProfiler
 from src.pipeline.prediction_pipeline import PredictionPipeline
 from src.forms.application_form import CustomerApplicationForm
 from src.pipeline.prediction_pipeline import PredictionPipeline
-# --------------------------------------------------
-# Streamlit Configuration
-# --------------------------------------------------
-
+from src.risk.risk_engine import RiskEngine
 st.set_page_config(
     page_title="AI Underwriting Agent",
     page_icon="🏦",
     layout="wide"
 )
-
 st.title("🏦 AI Underwriting Agent")
 st.markdown("## Offline Training Pipeline")
 
@@ -330,6 +326,7 @@ with tab12:
         model_results,
         use_container_width=True
     )
+
 with tab13:
 
     form = CustomerApplicationForm()
@@ -344,19 +341,59 @@ with tab13:
             application
         )
 
-        st.divider()
+        risk_engine = RiskEngine()
 
-        st.subheader("Risk Prediction")
-
-        st.metric(
-            "Probability of Default",
-            f"{probability:.2%}"
+        risk = risk_engine.calculate(
+            probability
         )
 
-        if prediction == 0:
+        st.divider()
 
-            st.success("Loan Category : Good Loan")
+        st.subheader("Risk Intelligence")
+
+        col1, col2 = st.columns(2)
+        col3, col4 = st.columns(2)
+
+        col1.metric(
+            "Risk Score",
+            risk["risk_score"]
+        )
+
+        col2.metric(
+            "Probability of Default",
+            f"{risk['probability_default']:.2%}"
+        )
+
+        col3.metric(
+            "Risk Bucket",
+            risk["risk_bucket"]
+        )
+
+        col4.metric(
+            "Confidence",
+            f"{risk['confidence']:.1f}%"
+        )
+
+        if risk["recommendation"] == "Approve":
+
+            st.success(
+                f"Recommendation: {risk['recommendation']}"
+            )
+
+        elif risk["recommendation"] == "Manual Review":
+
+            st.warning(
+                f"Recommendation: {risk['recommendation']}"
+            )
+
+        elif risk["recommendation"] == "Senior Underwriter Review":
+
+            st.warning(
+                f"Recommendation: {risk['recommendation']}"
+            )
 
         else:
 
-            st.error("Loan Category : Bad Loan")
+            st.error(
+                f"Recommendation: {risk['recommendation']}"
+            )
