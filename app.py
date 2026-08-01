@@ -2,7 +2,7 @@ import streamlit as st
 
 from src.pipeline.training_pipeline import TrainingPipeline
 from src.data.profiler import DataProfiler
-
+from src.pipeline.prediction_pipeline import PredictionPipeline
 
 # --------------------------------------------------
 # Streamlit Configuration
@@ -62,7 +62,7 @@ st.divider()
 # --------------------------------------------------
 # Tabs
 # --------------------------------------------------
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13 = st.tabs([
     "Preview",
     "Missing Values",
     "Data Types",
@@ -74,7 +74,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.t
     "Final Dataset",
     "Preprocessing",
     "Train/Test Split",
-    "Model Training"
+    "Model Training",
+    "Prediction Test"
 ])
 # --------------------------------------------------
 # Preview
@@ -328,3 +329,33 @@ with tab12:
         model_results,
         use_container_width=True
     )
+with tab13:
+
+    st.subheader("Prediction Pipeline Test")
+
+    sample = final_df.drop(
+        columns=["loan_status"]
+    ).head(1)
+
+    predictor = PredictionPipeline()
+
+    prediction, probability = predictor.predict(
+        sample
+    )
+
+    st.write("Sample Input")
+
+    st.dataframe(sample)
+
+    st.metric(
+        "Probability of Default",
+        f"{probability:.2%}"
+    )
+
+    if prediction == 1:
+
+        st.error("Prediction : Charged Off")
+
+    else:
+
+        st.success("Prediction : Fully Paid")
